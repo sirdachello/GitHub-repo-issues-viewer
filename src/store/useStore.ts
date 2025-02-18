@@ -19,7 +19,6 @@ export const useStore = create<Store>((set) => ({
   activeRepo: null,
   errorMessage: "",
   activeCard: null,
-  position: {x: 0, y: 0},
   data: {
     toDoArray: [],
     inProgressArray: [],

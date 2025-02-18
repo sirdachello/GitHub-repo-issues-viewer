@@ -1,6 +1,6 @@
 type Issue = {
   id: string;
-  state: string;
+  state: 'open' | 'closed';
   title: string;
   body: string;
   assignee: string | null;
@@ -15,7 +15,7 @@ type AllRepos = {
 type IssueColumnProps = {
   title: string;
   status: string;
-  dataToShow: Issue[];
+  dataToShow: string;
 };
 
 type IssueCardProps = {

@@ -28,7 +28,7 @@ function findDifferentElements(
   const differentElements = githubArray.filter(
     (githubArrayElem) =>
       !myStoredArray.some(
-        (myStoredArrayElem) => myStoredArrayElem.id === githubArrayElem.id
+        (myStoredArrayElem) => myStoredArrayElem.id == githubArrayElem.id
       )
   );
   return differentElements;
@@ -77,22 +77,24 @@ export default function SearchInput() {
     const regex = /https:\/\/github\.com\/([^/]+)\/([^/]+)/;
     const match = url?.match(regex);
     if (match && url) {
+      const existingListing = localStorage.getItem(url);
       setErrorMessage("");
       const owner = match[1];
       const repoName = match[2];
       setActiveRepo([owner, repoName]);
-
+      
       const APIurl = `https://api.github.com/repos/${owner}/${repoName}/issues?state=all`;
-      const result = await (await fetch(APIurl)).json();
-
+      // very interesting bug where localStorage retuns empty arrays after fetch??????
+      const response = await fetch(APIurl);
+      const result = await response.json();
       if (result.message === "Not Found") {
         setErrorMessage("Repository not found!");
         return
       } else {
-        const existingListing = localStorage.getItem(url);
+        
         if (existingListing !== null) {
           const parsedExistingListing = JSON.parse(existingListing);
-          console.log(JSON.parse(existingListing))
+          
           const deconstructedExistingListing = [
             ...(parsedExistingListing.toDoArray || []),
             ...(parsedExistingListing.inProgressArray || []),
@@ -102,7 +104,9 @@ export default function SearchInput() {
             deconstructedExistingListing,
             result
           );
+          
           if (differentElements.length !== 0) {
+            
             const sortedIssues = sortIssues(differentElements);
             const combinedIssues = {
               toDoArray: [
@@ -120,13 +124,12 @@ export default function SearchInput() {
             };
             localStorage.setItem(url, JSON.stringify(combinedIssues));
             setData(combinedIssues);
+          
           } else {
             setData(parsedExistingListing);
           }
         } else {
-          console.log("Setting new fetched data to localStorage!");
           localStorage.setItem(url, JSON.stringify(sortIssues(result)));
-          console.log("Setting new fetched data as our Data!");
           setData(sortIssues(result));
         }
       }

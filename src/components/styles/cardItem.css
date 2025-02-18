@@ -1,0 +1,37 @@
+.card-item {
+    box-sizing: border-box;
+    width: 100%;
+    text-align: left;
+    
+    padding: 10px;
+    border-radius: 0.3rem;
+
+    background-color: #fcd2ba;
+    border: 2px solid #ce9777;
+    margin-bottom: 15px;
+    transition-property: border, scale, border-color, border-radius, background-color;
+    transition-duration: 200ms;
+
+    box-shadow: 1px 2px 2px black;
+
+}
+.card-item:hover, .card-item:active  {
+    background-color: #dda381;
+}
+.card-button {
+    color: white;
+    width: 70px;
+    margin-top: 10px;
+    cursor: pointer;
+    background-color: #18181b;
+    border-radius: 0.3rem;
+    padding-inline: 1em;
+    padding-block: 0.2em;
+}
+.card-button:hover {
+    background-color: #26262b;
+}
+.card-footer{
+    display: flex;
+    justify-content: right;
+}
