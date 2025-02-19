@@ -1,7 +1,10 @@
-import { Heading, Text } from "@chakra-ui/react";
 import { IssueCardProps } from "@/types";
-import "./styles/cardItem.css";
+
 import { Draggable } from "@hello-pangea/dnd";
+
+import "./styles/cardItem.css";
+
+import { Heading, Text } from "@chakra-ui/react";
 
 export default function IssueCard({
   issue,
@@ -11,7 +14,7 @@ export default function IssueCard({
   
   // after a few hours trying to figuring out what causes such lag during
   // implementation of drag-n-drop,
-  // it was discovered that Chakra UI was the culprit :)
+  // it was discovered that Chakra UI was the culprit :) (<Button> specifically)
   // aka skill issue
 
   return (

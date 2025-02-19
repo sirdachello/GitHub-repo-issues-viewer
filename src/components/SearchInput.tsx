@@ -1,4 +1,5 @@
 import { FormEvent, useRef } from "react";
+import { useStore } from "../store/useStore";
 
 import {
   Container,
@@ -10,144 +11,34 @@ import {
 } from "@chakra-ui/react";
 import { Field } from "@/components/ui/field";
 import { LiaSlashSolid } from "react-icons/lia";
-
-import { useStore } from "../store/useStore";
-
-import { Issue } from "@/types";
-
-const inProgressFilter = (issue: Issue) =>
-  issue.state === "open" &&
-  issue.assignee !== null &&
-  issue.assignees.length !== 0;
-const doneFilter = (issue: Issue) => issue.state === "closed";
-
-function findDifferentElements(
-  myStoredArray: Issue[],
-  githubArray: Issue[]
-): Issue[] {
-  const differentElements = githubArray.filter(
-    (githubArrayElem) =>
-      !myStoredArray.some(
-        (myStoredArrayElem) => myStoredArrayElem.id == githubArrayElem.id
-      )
-  );
-  return differentElements;
-}
-
-function sortIssues(issues: Issue[]) {
-  const sortedIssues: {
-    toDoArray: Issue[];
-    inProgressArray: Issue[];
-    doneArray: Issue[];
-  } = {
-    toDoArray: [],
-    inProgressArray: [],
-    doneArray: [],
-  };
-
-  issues.forEach((issue: Issue) => {
-    const issueItem: Issue = {
-      id: issue.id,
-      state: issue.state,
-      title: issue.title,
-      body: issue.body,
-      assignee: issue.assignee,
-      assignees: issue.assignees,
-      html_url: issue.html_url,
-    };
-
-    if (doneFilter(issueItem)) {
-      sortedIssues.doneArray.push(issueItem);
-    } else if (inProgressFilter(issueItem)) {
-      sortedIssues.inProgressArray.push(issueItem);
-    } else sortedIssues.toDoArray.push(issueItem);
-  });
-
-  return sortedIssues;
-}
+import { useGitHubData } from "@/hooks/useGitHubData";
 
 export default function SearchInput() {
   const linkInput = useRef<HTMLInputElement>(null);
-  const { activeRepo, setActiveRepo, errorMessage, setErrorMessage, setData } =
-    useStore();
+  const { activeRepo, errorMessage, loading } = useStore();
+  const {loadData} = useGitHubData();
 
-  async function loadData(e: FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement>) {
+  function handleSubmit(e: FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement>) {
     e.preventDefault();
     const url = linkInput.current?.value;
-    const regex = /https:\/\/github\.com\/([^/]+)\/([^/]+)/;
-    const match = url?.match(regex);
-    if (match && url) {
-      const existingListing = localStorage.getItem(url);
-      setErrorMessage("");
-      const owner = match[1];
-      const repoName = match[2];
-      setActiveRepo([owner, repoName]);
-      
-      const APIurl = `https://api.github.com/repos/${owner}/${repoName}/issues?state=all`;
-      // very interesting bug where localStorage retuns empty arrays after fetch??????
-      const response = await fetch(APIurl);
-      const result = await response.json();
-      if (result.message === "Not Found") {
-        setErrorMessage("Repository not found!");
-        return
-      } else {
-        
-        if (existingListing !== null) {
-          const parsedExistingListing = JSON.parse(existingListing);
-          
-          const deconstructedExistingListing = [
-            ...(parsedExistingListing.toDoArray || []),
-            ...(parsedExistingListing.inProgressArray || []),
-            ...(parsedExistingListing.doneArray || []),
-          ];
-          const differentElements = findDifferentElements(
-            deconstructedExistingListing,
-            result
-          );
-          
-          if (differentElements.length !== 0) {
-            
-            const sortedIssues = sortIssues(differentElements);
-            const combinedIssues = {
-              toDoArray: [
-                ...parsedExistingListing.toDoArray,
-                ...sortedIssues.toDoArray,
-              ],
-              inProgressArray: [
-                ...parsedExistingListing.inProgressArray,
-                ...sortedIssues.inProgressArray,
-              ],
-              doneArray: [
-                ...parsedExistingListing.doneArray,
-                ...sortedIssues.doneArray,
-              ],
-            };
-            localStorage.setItem(url, JSON.stringify(combinedIssues));
-            setData(combinedIssues);
-          
-          } else {
-            setData(parsedExistingListing);
-          }
-        } else {
-          localStorage.setItem(url, JSON.stringify(sortIssues(result)));
-          setData(sortIssues(result));
-        }
-      }
-    } else {
-      setErrorMessage(
-        `Please, enter a valid repository link. Format: "https://github.com/owner/repository-name"`
-      );
+    if (url) {
+      loadData(url)
     }
   }
 
+
   return (
     <Container maxW={"1600px"}>
-      <form onSubmit={(e) => loadData(e)}>
+      <form onSubmit={(e) => handleSubmit(e)}>
         <Stack direction={"row"} alignItems="start">
           <Field invalid={errorMessage ? true : false} errorText={errorMessage}>
-            <Input onKeyDown={(e) => e.key === 'Enter' && loadData(e)} ref={linkInput} placeholder="GitHub Repo URL"></Input>
+            <Input
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit(e)}
+              ref={linkInput}
+              placeholder="GitHub Repo URL"
+            ></Input>
           </Field>
-          <Button type="submit">Load Issues</Button>
+          <Button type="submit" loading={loading}>Load Issues</Button>
         </Stack>
         {!errorMessage && activeRepo && (
           <Breadcrumb.Root my={"10px"} mx={"10px"}>

@@ -18,7 +18,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    "types": ["node", "jest"]
+    "types": ["vitest/globals", "node", "jest"],
+    "esModuleInterop": true
   },
   "include": ["vite.config.ts"]
 }
