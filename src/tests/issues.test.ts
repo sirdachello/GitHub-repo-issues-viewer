@@ -1,5 +1,5 @@
 import { Issue } from "@/types";
-import { doneFilter, inProgressFilter, findDifferentElements, sortIssues } from "../components/utils/issues";
+import { doneFilter, inProgressFilter, findDifferentElements, sortIssues } from "../hooks/utils/issues";
 
 describe("doneFilter", () => {
   it('should return true, if the key "state" has value "closed"', () => {

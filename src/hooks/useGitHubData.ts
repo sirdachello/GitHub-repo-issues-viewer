@@ -1,6 +1,6 @@
 import { useStore } from "@/store/useStore";
 
-import { findDifferentElements, sortIssues } from "../components/utils/issues";
+import { findDifferentElements, sortIssues } from "./utils/issues";
 
 export function useGitHubData() {
   const { setData, setErrorMessage, setActiveRepo, setLoading } = useStore();
@@ -13,8 +13,7 @@ export function useGitHubData() {
     const match = url.match(regex);
 
     if (match) {
-      //get items from localStorage before fetch call (test if the bug persists);
-      //very interesting bug where localStorage returns empty arrays after fetch??????
+      // very interesting behavior where localStorage.getItem(url) returns the object with empty arrays after fetch() 1/3
       const existingListing = localStorage.getItem(url);
 
       // set up clickable links to the repo and the owner
@@ -23,8 +22,9 @@ export function useGitHubData() {
       setActiveRepo([owner, repoName]);
 
       const APIurl = `https://api.github.com/repos/${owner}/${repoName}/issues?state=all`;
-
       const response = await fetch(APIurl);
+      // after this point localStorage.getItem(url) returns the object with empty arrays 2/3
+      // weirdly enough, if we set timeout (not 0ms) on localStorage.getItem(url), the issue is fixed  3/3 
       const result = await response.json();
 
       if (result.message === "Not Found") {
@@ -74,9 +74,7 @@ export function useGitHubData() {
         setData(sortedIssue);
       }
     } else {
-      setErrorMessage(
-        `Please, enter a valid repository link. Format: "https://github.com/owner/repository-name"`
-      );
+      setErrorMessage(`Please, enter a valid repository link. Format: "https://github.com/owner/repository-name"`);
     }
     setLoading(false);
   }

@@ -43,6 +43,5 @@ describe("IssueColumn", () => {
     expect(heading).toBeInTheDocument();
     expect(divElement).toBeInTheDocument();
     expect(heading).toHaveTextContent('ToDo');
-    screen.debug()
   });
 });

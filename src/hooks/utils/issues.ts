@@ -1,16 +1,16 @@
 import { Issue } from "@/types";
 
-
 function inProgressFilter(issue: Issue): boolean {
-    return issue.state === "open" &&
+  return (
+    issue.state === "open" &&
     issue.assignee !== null &&
-    issue.assignees.length !== 0;
+    issue.assignees.length !== 0
+  );
 }
 
 function doneFilter(issue: Issue): boolean {
-    return issue.state === "closed";
+  return issue.state === "closed";
 }
-
 
 function findDifferentElements(
   myStoredArray: Issue[],
@@ -21,7 +21,7 @@ function findDifferentElements(
       !myStoredArray.some(
         (myStoredArrayElem) => myStoredArrayElem.id == githubArrayElem.id
       )
-  )
+  );
 }
 
 function sortIssues(issues: Issue[]) {
@@ -56,4 +56,4 @@ function sortIssues(issues: Issue[]) {
   return sortedIssues;
 }
 
-export {inProgressFilter, doneFilter, findDifferentElements, sortIssues};
+export { inProgressFilter, doneFilter, findDifferentElements, sortIssues };
